@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>VCINITY Card Sorting Game</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			/* Complete redesign with modern, sophisticated styling using semantic design tokens */
+			:root {
+				--background: #ffffff;
+				--foreground: #4b5563;
+				--card: #f9fafb;
+				--card-foreground: #4b5563;
+				--primary: #0891b2;
+				--primary-foreground: #ffffff;
+				--secondary: #10b981;
+				--secondary-foreground: #ffffff;
+				--muted: #f9fafb;
+				--muted-foreground: #6b7280;
+				--accent: #10b981;
+				--border: #e5e7eb;
+				--input: #f9fafb;
+				--ring: rgba(8, 145, 178, 0.3);
+				--radius: 0.5rem;
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: "DM Sans", -apple-system, BlinkMacSystemFont,
+					"Segoe UI", sans-serif;
+				background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+				color: var(--foreground);
+				min-height: 100vh;
+				padding: 1rem 1rem;
+				line-height: 1.6;
+			}
+
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+			}
+
+			.header {
+				text-align: center;
+				margin-bottom: 3rem;
+			}
+
+			.header h1 {
+				font-size: 2.5rem;
+				font-weight: 700;
+				color: var(--primary);
+				letter-spacing: -0.025em;
+			}
+
+			.header p {
+				font-size: 1.125rem;
+				color: var(--muted-foreground);
+				font-weight: 400;
+			}
+
+			.groups-section {
+				margin-bottom: 1rem;
+			}
+
+			.section-title {
+				font-size: 1.25rem;
+				font-weight: 600;
+				color: var(--foreground);
+				margin-bottom: 1.5rem;
+				text-align: center;
+			}
+
+			.groups {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+				gap: 1.5rem;
+				margin-bottom: 2rem;
+			}
+
+			.group {
+				background: var(--card);
+				border: 2px dashed var(--border);
+				border-radius: var(--radius);
+				min-height: 300px;
+				padding: 1.5rem;
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+				position: relative;
+			}
+
+			.group:hover {
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+				transform: translateY(-2px);
+			}
+
+			.group.highlight {
+				background: rgba(8, 145, 178, 0.05);
+				border-color: var(--primary);
+				box-shadow: 0 0 0 3px var(--ring);
+			}
+
+			.group input {
+				width: 100%;
+				font-weight: 600;
+				font-size: 1.125rem;
+				text-align: center;
+				border: none;
+				background: transparent;
+				outline: none;
+				color: var(--foreground);
+				padding: 0.5rem;
+				border-radius: calc(var(--radius) - 2px);
+				transition: background-color 0.2s;
+			}
+
+			.group input:focus {
+				background: var(--background);
+				box-shadow: 0 0 0 2px var(--ring);
+			}
+
+			.group input::placeholder {
+				color: var(--muted-foreground);
+				font-weight: 500;
+			}
+
+			.cards-section {
+				margin-bottom: 2rem;
+			}
+
+			.cards-container {
+				background: var(--card);
+				border: 2px dashed var(--border);
+				border-radius: var(--radius);
+				min-height: 200px;
+				padding: 1.5rem;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 1rem;
+				justify-content: center;
+				align-items: flex-start;
+				position: relative;
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+				transition: all 0.3s ease;
+			}
+
+			.cards-container.highlight {
+				background: rgba(16, 185, 129, 0.05);
+				border-color: var(--accent);
+				box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+			}
+
+			.cards-container:empty::before {
+				content: "Drag cards from here to organize them into groups";
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				color: var(--muted-foreground);
+				font-size: 1rem;
+				font-weight: 500;
+				text-align: center;
+				pointer-events: none;
+			}
+
+			.card {
+				background: linear-gradient(
+					135deg,
+					var(--primary) 0%,
+					#0e7490 100%
+				);
+				color: var(--primary-foreground);
+				padding: 1rem 1.25rem;
+				border-radius: var(--radius);
+				cursor: grab;
+				font-weight: 500;
+				font-size: 0.875rem;
+				line-height: 1.4;
+				min-width: 180px;
+				max-width: 220px;
+				text-align: center;
+				box-shadow: 0 2px 8px rgba(8, 145, 178, 0.3);
+				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+				position: relative;
+				overflow: hidden;
+			}
+
+			.card::before {
+				content: "";
+				position: absolute;
+				top: 0;
+				left: -100%;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(
+					90deg,
+					transparent,
+					rgba(255, 255, 255, 0.2),
+					transparent
+				);
+				transition: left 0.5s;
+			}
+
+			.card:hover::before {
+				left: 100%;
+			}
+
+			.card:hover {
+				transform: translateY(-4px) scale(1.02);
+				box-shadow: 0 8px 25px rgba(8, 145, 178, 0.4);
+			}
+
+			.card:active {
+				cursor: grabbing;
+				transform: scale(1.05);
+				box-shadow: 0 12px 30px rgba(8, 145, 178, 0.5);
+			}
+
+			.card.dragging {
+				opacity: 0.5;
+				transform: rotate(5deg) scale(1.1);
+			}
+
+			.bounce {
+				animation: bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+			}
+
+			@keyframes bounce {
+				0% {
+					transform: scale(1) translateY(0);
+				}
+				50% {
+					transform: scale(1.1) translateY(-10px);
+				}
+				100% {
+					transform: scale(1) translateY(0);
+				}
+			}
+
+			.controls {
+				display: flex;
+				justify-content: center;
+				gap: 1rem;
+				margin-top: 2rem;
+			}
+
+			.btn {
+				padding: 0.75rem 1.5rem;
+				font-size: 1rem;
+				font-weight: 600;
+				border-radius: var(--radius);
+				border: none;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				text-decoration: none;
+				font-family: inherit;
+			}
+
+			.btn-primary {
+				background: var(--primary);
+				color: var(--primary-foreground);
+				box-shadow: 0 2px 8px rgba(8, 145, 178, 0.3);
+			}
+
+			.btn-primary:hover {
+				background: #0e7490;
+				transform: translateY(-2px);
+				box-shadow: 0 4px 12px rgba(8, 145, 178, 0.4);
+			}
+
+			.btn-secondary {
+				background: var(--accent);
+				color: var(--secondary-foreground);
+				box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+			}
+
+			.btn-secondary:hover {
+				background: #059669;
+				transform: translateY(-2px);
+				box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+			}
+
+			.stats {
+				display: flex;
+				justify-content: center;
+				gap: 2rem;
+				margin-top: 2rem;
+				padding: 1rem;
+				background: var(--muted);
+				border-radius: var(--radius);
+				border: 1px solid var(--border);
+			}
+
+			.stat {
+				text-align: center;
+			}
+
+			.stat-number {
+				font-size: 1.5rem;
+				font-weight: 700;
+				color: var(--primary);
+			}
+
+			.stat-label {
+				font-size: 0.875rem;
+				color: var(--muted-foreground);
+				font-weight: 500;
+			}
+
+			@media (max-width: 768px) {
+				.header h1 {
+					font-size: 2rem;
+				}
+
+				.groups {
+					grid-template-columns: 1fr;
+				}
+
+				.controls {
+					flex-direction: column;
+					align-items: center;
+				}
+
+				.stats {
+					flex-direction: column;
+					gap: 1rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<header class="header">
+				<h1>VCINITY Card Sorting</h1>
+			</header>
+
+			<section class="groups-section">
+				<div class="groups">
+					<div class="group" data-group="group1">
+						<input type="text" placeholder="Group 1" />
+					</div>
+					<div class="group" data-group="group2">
+						<input type="text" placeholder="Group 2" />
+					</div>
+					<div class="group" data-group="group3">
+						<input type="text" placeholder="Group 3" />
+					</div>
+					<div class="group" data-group="group4">
+						<input type="text" placeholder="Group 4" />
+					</div>
+				</div>
+			</section>
+
+			<section class="cards-section">
+				<div class="cards-container" id="cards-container"></div>
+			</section>
+
+			<div class="controls">
+				<button id="add-card" class="btn btn-primary">
+					+ Add New Card
+				</button>
+				<button id="reset-cards" class="btn btn-secondary">
+					↻ Reset All Cards
+				</button>
+			</div>
+
+			<div class="stats">
+				<div class="stat">
+					<div class="stat-number" id="total-cards">0</div>
+					<div class="stat-label">Total Cards</div>
+				</div>
+				<div class="stat">
+					<div class="stat-number" id="grouped-cards">0</div>
+					<div class="stat-label">Grouped</div>
+				</div>
+				<div class="stat">
+					<div class="stat-number" id="ungrouped-cards">0</div>
+					<div class="stat-label">Ungrouped</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			const initialCards = [
+				"Messaging",
+				"Notifications",
+				"Course Search",
+				"Enroll in Course",
+				"Join Live Class",
+				"View Recorded Class",
+				"Submit Assignment",
+				"Access Certificate",
+				"User Profile",
+				"Settings",
+				"Help / Support",
+				"Payment",
+				"Feedback / Ratings",
+				"International Student Resources",
+				"Mental Health Support",
+				"Social / Community Groups",
+				"Loneliness / Peer Support",
+				"Events & Workshops",
+			];
+
+			const cardsContainer = document.getElementById("cards-container");
+			const groups = document.querySelectorAll(".group");
+			const addCardBtn = document.getElementById("add-card");
+			const resetCardsBtn = document.getElementById("reset-cards");
+
+			// Statistics elements
+			const totalCardsEl = document.getElementById("total-cards");
+			const groupedCardsEl = document.getElementById("grouped-cards");
+			const ungroupedCardsEl = document.getElementById("ungrouped-cards");
+
+			let draggedCard = null;
+
+			// Create a card element with enhanced styling
+			function createCardElement(text) {
+				const card = document.createElement("div");
+				card.className = "card";
+				card.textContent = text;
+				card.draggable = true;
+				card.dataset.originalText = text;
+				addDragEvents(card);
+				cardsContainer.appendChild(card);
+				updateStats();
+				return card;
+			}
+
+			// Initialize cards
+			initialCards.forEach(createCardElement);
+
+			// Enhanced drag events with better visual feedback
+			function addDragEvents(card) {
+				card.addEventListener("dragstart", (e) => {
+					draggedCard = card;
+					e.dataTransfer.setData("text/plain", card.textContent);
+					card.classList.add("dragging");
+
+					// Add visual feedback to all drop zones
+					[...groups, cardsContainer].forEach((zone) => {
+						zone.style.transform = "scale(1.02)";
+					});
+				});
+
+				card.addEventListener("dragend", (e) => {
+					card.classList.remove("dragging");
+					draggedCard = null;
+
+					// Remove visual feedback from all drop zones
+					[...groups, cardsContainer].forEach((zone) => {
+						zone.style.transform = "scale(1)";
+						zone.classList.remove("highlight");
+					});
+				});
+			}
+
+			// Enhanced drop zone functionality
+			const dropZones = [...groups, cardsContainer];
+
+			dropZones.forEach((zone) => {
+				zone.addEventListener("dragover", (e) => {
+					e.preventDefault();
+					e.dataTransfer.dropEffect = "move";
+				});
+
+				zone.addEventListener("dragenter", (e) => {
+					e.preventDefault();
+					zone.classList.add("highlight");
+				});
+
+				zone.addEventListener("dragleave", (e) => {
+					// Only remove highlight if we're actually leaving the zone
+					if (!zone.contains(e.relatedTarget)) {
+						zone.classList.remove("highlight");
+					}
+				});
+
+				zone.addEventListener("drop", (e) => {
+					e.preventDefault();
+					const card = draggedCard;
+
+					if (card) {
+						// Smooth transition
+						card.style.transition =
+							"all 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
+						zone.appendChild(card);
+
+						// Add bounce animation
+						card.classList.add("bounce");
+						setTimeout(() => card.classList.remove("bounce"), 600);
+
+						// Update statistics
+						updateStats();
+					}
+
+					zone.classList.remove("highlight");
+				});
+			});
+
+			// Add new card functionality
+			addCardBtn.addEventListener("click", () => {
+				const newCardName = prompt("Enter the name of the new card:");
+				if (newCardName && newCardName.trim()) {
+					createCardElement(newCardName.trim());
+				}
+			});
+
+			// Reset all cards functionality
+			resetCardsBtn.addEventListener("click", () => {
+				if (
+					confirm(
+						"Are you sure you want to reset all cards to the original container?"
+					)
+				) {
+					const allCards = document.querySelectorAll(".card");
+					allCards.forEach((card) => {
+						card.classList.add("bounce");
+						cardsContainer.appendChild(card);
+						setTimeout(() => card.classList.remove("bounce"), 600);
+					});
+					updateStats();
+				}
+			});
+
+			// Update statistics
+			function updateStats() {
+				const allCards = document.querySelectorAll(".card");
+				const cardsInContainer =
+					cardsContainer.querySelectorAll(".card");
+				const cardsInGroups = allCards.length - cardsInContainer.length;
+
+				totalCardsEl.textContent = allCards.length;
+				groupedCardsEl.textContent = cardsInGroups;
+				ungroupedCardsEl.textContent = cardsInContainer.length;
+			}
+
+			// Initialize stats
+			updateStats();
+
+			// Add keyboard shortcuts
+			document.addEventListener("keydown", (e) => {
+				if (e.ctrlKey || e.metaKey) {
+					switch (e.key) {
+						case "n":
+							e.preventDefault();
+							addCardBtn.click();
+							break;
+						case "r":
+							e.preventDefault();
+							resetCardsBtn.click();
+							break;
+					}
+				}
+			});
+		</script>
+	</body>
+</html>
