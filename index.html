@@ -83,7 +83,7 @@
 			.groups {
 				display: grid;
 				grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-				gap: 1.5rem;
+				gap: 1rem;
 				margin-bottom: 2rem;
 			}
 
@@ -395,6 +395,8 @@
 			</div>
 		</div>
 
+		<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
 		<script>
 			const initialCards = [
 				"Messaging",
@@ -574,6 +576,18 @@
 							break;
 					}
 				}
+			});
+
+			const groupss = document.querySelectorAll(".group");
+			groupss.forEach((group) => {
+				new Sortable(group, {
+					group: "shared", // Allow drag between groups
+					animation: 150, // Smooth animation
+					ghostClass: "sortable-ghost", // While dragging
+					swapThreshold: 0.65, // Helps with precise positioning
+					chosenClass: "sortable-chosen",
+					dragClass: "sortable-drag",
+				});
 			});
 		</script>
 	</body>
